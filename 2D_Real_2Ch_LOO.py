@@ -73,8 +73,13 @@ def create_hermitian_images_2ch(re, im):
 
 
 def load_battery_sequences(bat_id):
-    """加载单个电池数据并生成图像序列"""
+    """加载单个电池数据并生成图像序列（仅保留 SOH >= 0.8 的部分）"""
     data = load_single_battery(FOLDER, bat_id, ['Stage5'])
+    # 截取 SOH >= 0.8 的部分
+    mask = data['soh'] >= 0.8
+    data['re']  = data['re'][mask]
+    data['im']  = data['im'][mask]
+    data['soh'] = data['soh'][mask]
     X_img = create_hermitian_images_2ch(data['re'], data['im'])
     X_seq, y_seq = create_sequences(X_img, data['soh'], seq_len=SEQ_LEN)
     return X_seq, y_seq, data['soh']
